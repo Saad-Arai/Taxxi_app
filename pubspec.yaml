@@ -26,6 +26,8 @@ dependencies:
   google_maps_flutter: ^0.5.21+7
   geoflutterfire: ^2.0.3+5
   location: ^2.3.5
+  share: ^0.6.2+3
+  image_picker: ^0.6.1+4
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -40,7 +42,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
- 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

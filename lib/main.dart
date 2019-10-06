@@ -12,7 +12,7 @@ class TaxiApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.teal,
       ),
-      home: HomePage(title: 'Taxi App'),
+      home: new HomePage(),
     );
       
     

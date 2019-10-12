@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:taxi_app/About.dart';
 import 'package:taxi_app/HomePage.dart';
 import 'package:taxi_app/Payments.dart';
@@ -8,7 +8,7 @@ import 'package:taxi_app/Rides.dart';
 import 'package:taxi_app/Setting.dart';
 import 'package:taxi_app/Wallet.dart';
 import 'package:share/share.dart';
-import 'package:taxi_app/google_map_request.dart';
+import 'package:taxi_app/state.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.title}) : super(key: key);
@@ -21,9 +21,11 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
         appBar: AppBar(
           title: new Text("Taxi App"),
           actions: <Widget>[
+            
             IconButton(
               onPressed: () => Share.share(
                   "Download the Taxi App and share with your friends.\nPlayStore -  "
@@ -36,6 +38,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         drawer: new Drawer(
+          
           child: new ListView(
             children: <Widget>[
               new UserAccountsDrawerHeader(
@@ -123,25 +126,19 @@ class Map extends StatefulWidget {
 }
 
 class _MapState extends State<Map> {
-  GoogleMapController mapController;
-  GoogleMapService _googleMapServices = GoogleMapService();
-  TextEditingController locationController = TextEditingController();
-  TextEditingController destinationController = TextEditingController();
-  static LatLng _initialPosition;
-  LatLng _lastPosition = _initialPosition;
-  final Set<Marker> _markers = { };
-  final Set<Polyline> _polyLines = { };
-
   @override
   void initState() {
     super.initState();
-    _getUserLocation();
   }
 
   @override
   Widget build(BuildContext context) {
-    return _initialPosition == null
+    final Stateapp = Provider.of<StateApp>(context);
+
+    return Stateapp.initialPosition == null
         ? Container(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
             alignment: Alignment.center,
             child: Center(
               child: CircularProgressIndicator(),
@@ -151,39 +148,42 @@ class _MapState extends State<Map> {
             children: <Widget>[
               GoogleMap(
                 initialCameraPosition:
-                    CameraPosition(target: _initialPosition, zoom: 10),
-                onMapCreated: onCreated,
-                myLocationEnabled: true,
+                    CameraPosition(target: Stateapp.initialPosition, zoom: 10),
+                onMapCreated: Stateapp.onCreated,
+                scrollGesturesEnabled: true,
+                tiltGesturesEnabled: true,
+                zoomGesturesEnabled: true,
+                //myLocationEnabled: true,
                 mapType: MapType.normal,
                 compassEnabled: true,
-                markers: _markers,
-                onCameraMove: _onCameraMove,
-                polylines: _polyLines,
+                markers: Stateapp.markers,
+                onCameraMove: Stateapp.onCameraMove,
+                polylines: Stateapp.polylines,
               ),
               Positioned(
-                top: 50.0,
+                top: 49.0,
                 right: 15.0,
                 left: 15.0,
                 child: Container(
                   height: 50.0,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(3.0),
+                    borderRadius: BorderRadius.circular(14.0),
                     color: Colors.white,
                     boxShadow: [
                       BoxShadow(
                           color: Colors.grey,
                           offset: Offset(1.0, 5.0),
                           blurRadius: 10,
-                          spreadRadius: 3)
+                          spreadRadius: 4)
                     ],
                   ),
                   child: TextField(
                     cursorColor: Colors.black,
-                    controller: locationController,
+                    controller: Stateapp.destinationController,
                     decoration: InputDecoration(
                       icon: Container(
-                        margin: EdgeInsets.only(left: 20, top: 5),
+                        margin: EdgeInsets.only(left: 20, top: 3),
                         width: 10,
                         height: 10,
                         child: Icon(
@@ -199,29 +199,29 @@ class _MapState extends State<Map> {
                 ),
               ),
               Positioned(
-                top: 105.0,
+                top: 115.0,
                 right: 15.0,
                 left: 15.0,
                 child: Container(
                   height: 50.0,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(3.0),
+                    borderRadius: BorderRadius.circular(14.0),
                     color: Colors.white,
                     boxShadow: [
                       BoxShadow(
                           color: Colors.grey,
                           offset: Offset(1.0, 5.0),
                           blurRadius: 10,
-                          spreadRadius: 3)
+                          spreadRadius: 4)
                     ],
                   ),
                   child: TextField(
                     cursorColor: Colors.black,
-                    controller: destinationController,
+                    controller: Stateapp.destinationController,
                     textInputAction: TextInputAction.go,
                     onSubmitted: (value) {
-                      sendRequest(value);
+                      Stateapp.sendRequest(value);
                     },
                     decoration: InputDecoration(
                       icon: Container(
@@ -250,98 +250,5 @@ class _MapState extends State<Map> {
                                                                                           )*/
             ],
           );
-  }
-
-  void onCreated(GoogleMapController controller) {
-    setState(() {
-      mapController = controller;
-    });
-  }
-
-  void _onCameraMove(CameraPosition position) {
-    setState(() {
-      _lastPosition = position.target;
-    });
-  }
-
-  void _onMarkerPressed(LatLng location, String address) {
-    setState(() {
-      _markers.add(Marker(
-          markerId: MarkerId(_lastPosition.toString()),
-          position: location,
-          infoWindow: InfoWindow(title: "Address", snippet: "Go here"),
-          icon: BitmapDescriptor.defaultMarker));
-    });
-  }
-
-  void createRoute(String encodedPoly) {
-    setState(() {
-      _polyLines.add(Polyline(
-          polylineId: PolylineId(_lastPosition.toString()),
-          width: 10,
-          points: convertToLatLng(decodePoly(encodedPoly)),
-          color: Colors.teal));
-    });
-  }
-
-  List<LatLng> convertToLatLng(List points) {
-    List<LatLng> result = <LatLng>[];
-    for (int i = 0; i < points.length; i++) {
-      if (i % 2 != 0) {
-        result.add(LatLng(points[i - 1], points[i]));
-      }
-    }
-    return result;
-  }
-
-  List decodePoly(String poly) {
-    var list = poly.codeUnits;
-    var lList = new List();
-    int index = 0;
-    int len = poly.length;
-    int c = 0;
-
-    do {
-      var shift = 0;
-      int result = 0;
-
-      do {
-        c = list[index] - 63;
-        result |= (c & 0x1F) << (shift * 5);
-        index++;
-        shift++;
-      } while (c >= 32);
-      if (result & 1 == 1) {
-        result = ~result;
-      }
-      var result1 = (result >> 1) * 0.00001;
-      lList.add(result1);
-    } while (index < len);
-    for (var i = 2; i < lList.length; i++) lList[i] += lList[i - 1];
-    print(lList.toString());
-    return lList;
-  }
-
-  void _getUserLocation() async {
-    Position position = await Geolocator()
-        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    List<Placemark> placemark = await Geolocator()
-        .placemarkFromCoordinates(position.latitude, position.longitude);
-    setState(() {
-      _initialPosition = LatLng(position.latitude, position.longitude);
-      locationController.text = placemark[0].name;
-    });
-  }
-
-  void sendRequest(String intendedLocation) async {
-    List<Placemark> placemark =
-        await Geolocator().placemarkFromAddress(intendedLocation);
-    double latitude = placemark[0].position.latitude;
-    double longitude = placemark[0].position.longitude;
-    LatLng destination = LatLng(latitude, longitude);
-    _onMarkerPressed(destination, intendedLocation);
-    String route = await _googleMapServices.getRouteCoordinates(
-        _initialPosition, destination);
-    createRoute(route);
   }
 }

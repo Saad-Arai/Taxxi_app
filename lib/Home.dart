@@ -23,12 +23,12 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       
         appBar: AppBar(
-          title: new Text("Taxi App"),
+          title: new Text("Cab Service"),
           actions: <Widget>[
             
             IconButton(
               onPressed: () => Share.share(
-                  "Download the Taxi App and share with your friends.\nPlayStore -  "
+                  "Download the Cab Service and share with your friends.\nPlayStore -  "
                   "https://play.google.com/store/apps"),
               icon: Icon(
                 Icons.share,
@@ -98,11 +98,11 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
               new Divider(),
-              new ListTile(),
-              new ListTile(),
-              new ListTile(),
-              new Divider(),
-              new ListTile(
+              //new ListTile(),
+              //new ListTile(),
+              //new ListTile(),
+              //new Divider(),
+              /*new ListTile(
                 title: new Text("FAQ"),
                 trailing: new Icon(
                   Icons.priority_high,
@@ -112,7 +112,7 @@ class _HomePageState extends State<HomePage> {
                   Navigator.push(context,
                       MaterialPageRoute(builder: (context) => AboutPage()));
                 },
-              ),
+              ),*/
             ],
           ),
         ),
@@ -151,9 +151,9 @@ class _MapState extends State<Map> {
                     CameraPosition(target: Stateapp.initialPosition, zoom: 10),
                 onMapCreated: Stateapp.onCreated,
                 scrollGesturesEnabled: true,
-                tiltGesturesEnabled: true,
-                zoomGesturesEnabled: true,
-                //myLocationEnabled: true,
+                //tiltGesturesEnabled: true,
+                //zoomGesturesEnabled: true,
+                myLocationEnabled: true,
                 mapType: MapType.normal,
                 compassEnabled: true,
                 markers: Stateapp.markers,
@@ -180,7 +180,7 @@ class _MapState extends State<Map> {
                   ),
                   child: TextField(
                     cursorColor: Colors.black,
-                    controller: Stateapp.destinationController,
+                    controller: Stateapp.locationController,
                     decoration: InputDecoration(
                       icon: Container(
                         margin: EdgeInsets.only(left: 20, top: 3),
@@ -240,14 +240,6 @@ class _MapState extends State<Map> {
                   ),
                 ),
               ),
-              /* Positioned(
-                                                top: 40,
-                                                right: 10,
-                                                child: FloatingActionButton(onPressed: _onMarkerPressed, tooltip: "Add Marker",
-                                                backgroundColor: darkBlue,
-                                                child: Icon(Icons.add_location, color: white,),
-                                                ),
-                                                                                          )*/
             ],
           );
   }

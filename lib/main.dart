@@ -29,7 +29,7 @@ class TaxiApp extends StatelessWidget {
     return new MaterialApp(
       
       debugShowCheckedModeBanner: false,
-      title: 'Taxi App',
+      title: 'Cab Service',
       theme: new ThemeData(
           primarySwatch: Colors.teal,
           primaryColor: defaultTargetPlatform == TargetPlatform.iOS
